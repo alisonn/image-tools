@@ -13,24 +13,27 @@ from decimal import *
 # @return: arguments - image_path_list, main_dir, K
 def get_args():
 	parser = argparse.ArgumentParser()
-	parser.add_argument("main_dir", help = 'main-dir should be in context of main-dir/pev-crossN/images')
+	parser.add_argument("main_dir", help = 'main-dir is directory above main exp directory i.e. main-dir/pev-crossN/images')
 	parser.add_argument("K", help = 'should be num_clusters + 1 (for background)')
-	parser.add_argument("calculation_file", help = 'file where results are written', default = "pev_results.tsv")
+	parser.add_argument("calculation_file", help = 'file where results are written')
+	parser.add_argument("suffix", help = 'the extension of desired images to process')
 	args = parser.parse_args()
 	return args 
 
 # collects all image paths into array
 # @param: name of output text file, path to dir with pev subdirectories
 # @return: list with paths to individual images = [image1 path, image2 path, ..., imageN path]
-## TESTING: PASS  6/5/2017 AHN ##
-def get_images_from_dirs(main_dir):
-	sub_dirs = glob(main_dir)
+## TESTING: PASS  6/7/2017 AHN ##
+def get_images_from_dirs(main_dir, suffix):
+	img_ct = 0
+	sub_dirs = glob(str(main_dir + '*'))
 	image_paths = []
 	for dir in sub_dirs:
 		for file in os.listdir(dir):
-			if file.endswith(".png"):
+			if file.endswith(suffix):
 				image_paths.append(os.path.join(dir, file))
-				print os.path.join(dir, file)
+				img_ct += 1
+	print "found paths for " + str(img_ct) + " files ending with " + str(suffix)
 	return image_paths
 
 # function handles reading the images one at a time into a master array so it may take a while
@@ -165,18 +168,18 @@ def batch_process_kmeans_images(label, center, master_image, image_paths, calcul
 def main():
 	args = get_args()
 
-	image_paths = get_images_from_dirs(args.main_dir)
-	print "obtained paths to images"
-
-	data_set,master_image = batch_read_images(image_paths)
-	print "batch read images done"
-
-	ret,label,center = run_kmeans(data_set, args.K)
-	print "finished running k-means on data set"
-
-	batch_process_kmeans_images(label, center, master_image, image_paths, args.calculation_file)
-
-	print "wrote all images and corresponding pev percentages"
+	image_paths = get_images_from_dirs(args.main_dir, args.suffix)
+#	print "obtained paths to images"
+#
+#	data_set,master_image = batch_read_images(image_paths)
+#	print "batch read images done"
+#
+#	ret,label,center = run_kmeans(data_set, args.K)
+#	print "finished running k-means on data set"
+#
+#	batch_process_kmeans_images(label, center, master_image, image_paths, args.calculation_file)
+#
+#	print "wrote all images and corresponding pev percentages"
 
 ##########
 
